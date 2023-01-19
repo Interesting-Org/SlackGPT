@@ -5,7 +5,7 @@ from chatgpt_wrapper import ChatGPT
 import time
 from ChatBotThread import ChatBotThread
 
-class GPTThread(ChatBotThread):
+class ChatGPTAPI(ChatBotThread):
     def __init__(self, handler: Handler, browser: str, prefix: str = "!", headless: bool = True):
         """Inherits from threading.Thread and is used to run ChatGPT in a separate thread
 
@@ -35,7 +35,7 @@ class GPTThread(ChatBotThread):
 
     def ask(self, question: Question) -> str:
         try:
-            self.lg.info(f"Asking ChatGPT with prompt {question.text[len(self.prefix) if question.direct_message else 0:]}")
+            self.lg.log(f"Asking ChatGPT with prompt {question.text[len(self.prefix) if question.direct_message else 0:]}")
             if not question.user.conversation_id is None:
                 self.bot.conversation_id = question.user.conversation_id
             start = time.time()
