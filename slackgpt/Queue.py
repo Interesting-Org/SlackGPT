@@ -1,35 +1,35 @@
-from Question import Question
+from typing import Any
 
 class Queue:
     def __init__(self):
-        """Represents a queue of questions to be answered by ChatGPT
+        """Represents a queue of items
         """
         self.__queue = []
 
-    def push(self, question: Question):
-        """Adds a question to the queue
+    def push(self, item):
+        """Adds an item into the queue
 
         Args:
-            question (Question): The question to add to the queue
-
-        Raises:
-            TypeError: If the question is not of type Question
+            item (Any): The item to be added
         """
-        if not isinstance(question, Question):
-            raise TypeError("Question must be of type Question")
-        self.__queue.append(question)
+        self.__queue.append(item)
 
-    def pop(self) -> Question:
-        """Removes the first question from the queue and returns it
+    def pop(self):
+        """Returns the first item in the queue
 
         Returns:
-            Question: The first question in the queue
+            Any: The first item in the queue
         """
         return self.__queue.pop(0)
 
-    def __len__(self) -> Question:
+    def __len__(self) -> int:
+        """The lenght of the queue
+
+        Returns:
+            int: The lenght of the queue
+        """
         return len(self.__queue)
 
-    def __getitem__(self, index) -> Question:
+    def __getitem__(self, index) -> Any:
         return self.__queue[index]
 
