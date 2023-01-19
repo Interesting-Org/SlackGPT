@@ -28,4 +28,12 @@ class ChatBotThread(threading.Thread):
         return super().run()
 
     def ask(self, question: Question) -> str:
+        """Write logic for API in here
+
+        Args:
+            question (Question): The question as input
+
+        Returns:
+            str: The string answer provided by the api
+        """
         return ""
