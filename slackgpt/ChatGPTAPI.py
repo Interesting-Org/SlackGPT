@@ -21,27 +21,12 @@ class ChatGPTAPI(ChatBotThread):
         )
         self.create_bot = lambda: ChatGPT(browser=self.browser, headless=self.headless)
 
-    def run(self):
-        """The method that is run when the thread is started
-        """
-        self.lg.info(f"Running GPT Thread {self.ident}")
-        self.lg.info(f"Initializing ChatGPT")
+    def ask(self, question: Question):
+        self.lg.log(f"Asking ChatGPT with prompt {question.text[(len(self.prefix) if not question.direct_message else 0):]}")
+        if not question.user.conversation_id is None:
+            self.bot.conversation_id = question.user.conversation_id
         start = time.time()
-        self.bot = self.create_bot()
-        self.lg.info(f"Initialized ChatGPT. Took {time.time() - start} seconds")
-        while True:
-            if len(self.queue) > 0:
-                self.ask(self.queue.pop())
-
-    def ask(self, question: Question) -> str:
-        try:
-            self.lg.log(f"Asking ChatGPT with prompt {question.text[len(self.prefix) if question.direct_message else 0:]}")
-            if not question.user.conversation_id is None:
-                self.bot.conversation_id = question.user.conversation_id
-            start = time.time()
-            question.answer(self.bot.ask(question.text[len(self.prefix) if question.direct_message else 0:]))
-            self.lg.info(f"Answered {question.username} in {time.time() - start} seconds")
-            question.user.conversation_id = self.bot.conversation_id
-        except Exception as e:
-            self.lg.error(e)
-            question.answer(f"An error occured while asking ChatGPT the question. Please try again later. \n{e.with_traceback}")
+        question.answer(self.bot.ask(question.text[(len(self.prefix) if not question.direct_message else 0):]))
+        self.lg.info(f"Answered {question.username} in {time.time() - start} seconds")
+        question.user.conversation_id = self.bot.conversation_id
+        

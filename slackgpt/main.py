@@ -6,7 +6,8 @@ import json
 import argparse
 from Logger import *
 from Handler import Handler
-from ChatGPTAPI import ChatGPTAPI
+#from ChatGPTAPI import ChatGPTAPI
+from DavinciApi import DavinciApi
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--auth_path", help="Specifies the path to a file containing first the Slack Bot token, then the Slack signing secret", required=False)
@@ -45,7 +46,7 @@ def message(payload: dict):
             handler.waiting_messages.append(event["ts"])
         return Response("OK", status=200)
 
-    handler.messages.append(payload["event_id"])
+    handler.append_message(payload["event_id"])
 
     user = client.users_info(user=event["user"]) # lookup the user id to get the username and profile picture
     username = user["user"]["profile"]["display_name"]
@@ -63,7 +64,7 @@ def message(payload: dict):
 
 if __name__ == "__main__":
     lg.info("Starting GPT Thread from main.py")
-    gpt_thread = ChatGPTAPI(handler, args.browser, args.prefix, args.headless)
+    gpt_thread = DavinciApi(handler, args.browser, args.prefix, args.headless)
     lg.info("Started GPT Thread from main.py")
     gpt_thread.start()
     app.run(debug=args.debug)
