@@ -10,12 +10,15 @@ class Handler:
     def __init__(self, client: WebClient) -> None:
         """Represents a handler for the questions, users and queue
         """
-        self.messages: List[str] = []
+        self.__messages: List[str] = []
         self.users: List[User] = []
         self.queue: Queue = Queue()
         self.client = client
         self.lg = Logger("Handler", level=Level.INFO, formatter=Logger.minecraft_formatter, handlers=[FileHandler.latest_file_handler(Logger.minecraft_formatter), main_file_handler])
         self.waiting_messages = []
+
+    def append_message(self, message_id: str) -> None:
+        self.__messages.append(message_id)
 
     def get_user(self, username: str) -> User:
         """Returns either an existing user or a new user object
@@ -41,12 +44,8 @@ class Handler:
         event = payload["event"]
         message = event["text"]
         user = self.get_user(username)
-        if user.in_pending(message) or user.in_answered(message):
-            self.client.chat_postMessage(channel=event["channel"], text="You already asked that question. Please wait for an answer. \n" if user.in_pending(message) else [question.answer_text for question in user.answered if question.text == message][0])
-            self.lg.log(f"{username} asked a question that they already asked")
-            return Response("OK", status=200)
         try:
-            question = Question(event["channel"], username, message, user, event["ts"], self.client, direct_message=event["channel"] == "im")
+            question = Question(event["channel"], username, message, user, event["ts"], self.client, direct_message=event["channel_type"] == "im")
             question.send_pre_answer()
             self.queue.push(question)
             self.lg.info(f"Added {username} to queue")
@@ -65,5 +64,5 @@ class Handler:
         Returns:
             bool: Whether the message event has already been registered
         """
-        return not payload["event_id"] in self.messages
+        return not payload["event_id"] in self.__messages
 
