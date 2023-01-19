@@ -6,7 +6,7 @@ import json
 import argparse
 from Logger import *
 from Handler import Handler
-from GPTThread import GPTThread
+from ChatGPTAPI import ChatGPTAPI
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--auth_path", help="Specifies the path to a file containing first the Slack Bot token, then the Slack signing secret", required=False)
@@ -25,7 +25,7 @@ else:
     token, secret = args.token, args.secret
 
 lg = Logger("SlackGPT", level=Level.DEBUG if args.debug else Level.INFO, formatter=Logger.minecraft_formatter, handlers=[FileHandler.latest_file_handler(Logger.minecraft_formatter), main_file_handler])
-clg = Logger("CHAT", level=Level.WARNING, formatter=Logger.minecraft_formatter, handlers=[FileHandler(Level.LOG, Logger.minecraft_formatter, directory="./logs", generator=lambda *_: "chat.log"), main_file_handler])
+clg = Logger("CHAT", level=Level.WARNING, formatter=Logger.minecraft_formatter, handlers=[FileHandler(Level.LOG, Logger.minecraft_formatter, directory="./logs", generator=lambda directory, _: (directory + '/' if directory else '') + "chat.log"), main_file_handler])
 app = Flask("SlackGPT") 
 adapter = SlackEventAdapter(secret, "/slack/events", app)
 
@@ -63,7 +63,7 @@ def message(payload: dict):
 
 if __name__ == "__main__":
     lg.info("Starting GPT Thread from main.py")
-    gpt_thread = GPTThread(handler, args.browser, args.prefix, args.headless)
+    gpt_thread = ChatGPTAPI(handler, args.browser, args.prefix, args.headless)
     lg.info("Started GPT Thread from main.py")
     gpt_thread.start()
     app.run(debug=args.debug)
