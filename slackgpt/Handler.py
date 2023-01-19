@@ -43,6 +43,7 @@ class Handler:
         user = self.get_user(username)
         if user.in_pending(message) or user.in_answered(message):
             self.client.chat_postMessage(channel=event["channel"], text="You already asked that question. Please wait for an answer. \n" if user.in_pending(message) else [question.answer_text for question in user.answered if question.text == message][0])
+            self.lg.log(f"{username} asked a question that they already asked")
             return Response("OK", status=200)
         try:
             question = Question(event["channel"], username, message, user, event["ts"], self.client, direct_message=event["channel"] == "im")
