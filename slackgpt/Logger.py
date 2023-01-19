@@ -123,6 +123,8 @@ class FileHandler(Handler):
     def nameless_generator(directory: str, _: str, extension: str = "txt") -> str:
         return f"{directory + '/' if directory else ''}{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.{extension}"
 
+    path = None
+
     latest_file_handler = lambda formatter, directory = "./logs": FileHandler(Level.DEBUG, formatter, directory, FileHandler.__latest_generator)
     error_file_handler = lambda formatter, directory = "./logs": FileHandler(Level.ERROR, formatter, directory, FileHandler.__error_generator)
 
@@ -134,10 +136,13 @@ class FileHandler(Handler):
 
     def __call__(self, text: str, name: str, level: Level) -> None:
         if level.value >= self.level.value:
-            file = self.generator(self.directory, name)
+            if self.path is None:
+                self.path = self.generator(self.directory, name)
+                if self.path.endswith("\\") or self.path.endswith("/"):
+                    raise ValueError(f"The path for {name} cannot be a directory. {self.path}")
             if not os.path.exists(self.directory):
                 os.mkdir(self.directory)
-            with open(file, "a" if os.path.exists(file) else "w+") as f:
+            with open(self.path, "a" if os.path.exists(self.path) else "w+") as f:
                 f.write(self.formatter(str(text) + "\n", level, name, {}))
 
 
