@@ -1,4 +1,4 @@
-from Handler import Handler
+from QuestionHandler import QuestionHandler
 from Logger import *
 from Question import Question
 from chatgpt_wrapper import ChatGPT
@@ -6,7 +6,7 @@ import time
 from ChatBotThread import ChatBotThread
 
 class ChatGPTAPI(ChatBotThread):
-    def __init__(self, handler: Handler, browser: str, prefix: str = "!", headless: bool = True):
+    def __init__(self, handler: QuestionHandler, browser: str, prefix: str = "!", headless: bool = True):
         """Inherits from threading.Thread and is used to run ChatGPT in a separate thread
 
         Args:
