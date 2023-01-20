@@ -47,7 +47,7 @@ class Handler:
         try:
             question = Question(event["channel"], username, message, user, event["ts"], self.client, direct_message=event["channel_type"] == "im")
             question.send_pre_answer()
-            self.queue.push(question)
+            self.add_new_question(question)
             self.lg.info(f"Added {username} to queue")
             return Response("OK", status=200)
         except Exception as e:
@@ -65,4 +65,16 @@ class Handler:
             bool: Whether the message event has already been registered
         """
         return not payload["event_id"] in self.__messages
+
+    def add_new_question(self, question: Question, index: int = None) -> None:
+        """Adds a new question to the queue
+
+        Args:
+            question (Question): The question to add
+            index (int, optional): The index to add the question to. Defaults to None.
+        """
+        if index:
+            self.queue.insert(index, question)
+        else:
+            self.queue.push(question, index)
 

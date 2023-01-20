@@ -18,7 +18,7 @@ class ChatBotThread(threading.Thread):
         """
         super().__init__()
         self.queue: Queue = handler.queue
-        self.handler = handler
+        self.handler: Handler = handler
         self.lg = Logger("ChatBot", level=Level.INFO, formatter=Logger.minecraft_formatter, handlers=[FileHandler.latest_file_handler(Logger.minecraft_formatter), main_file_handler])
         self.browser = browser
         self.headless = headless
@@ -44,7 +44,7 @@ class ChatBotThread(threading.Thread):
                 except Exception as e:
                     self.lg.error(e)
                     if "Execution context was destroyed" in str(e):
-                        self.queue.insert(0, question)
+                        self.handler.add_new_question(question, 0)
                         self.lg.warning(f"Execution context was destroyed. Reinserting question into queue")
                         continue 
                     question.answer(f"An error occured while asking the ChatBot the question. Please try again later. \n{e.with_traceback}")
