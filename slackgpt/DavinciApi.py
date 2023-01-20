@@ -57,10 +57,10 @@ class DavinciBot(Bot):
 
 class DavinciApi(ChatBotThread):
 
-    def __init__(self, handler, browser, prefix, headless=True):
+    def __init__(self, handler, browser, prefix, headless=True, model: str = "text-davinci-003"):
         super().__init__(handler, browser, prefix, headless)
         self.lg.name = "DavinciApi"
-        self.create_bot = lambda: DavinciBot(open("OPENAI_KEY", "r").read())
+        self.create_bot = lambda: DavinciBot(open("OPENAI_KEY", "r").read(), model=model)
 
     def ask(self, question: Question):
         self.lg.info(f"Asking Davinci with prompt {question.text[(len(self.prefix) if not question.direct_message else 0):]}")

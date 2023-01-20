@@ -6,8 +6,9 @@ import json
 import argparse
 from Logger import *
 from Handler import Handler
-#from ChatGPTAPI import ChatGPTAPI
+from ChatGPTAPI import ChatGPTAPI
 from DavinciApi import DavinciApi
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--auth_path", help="Specifies the path to a file containing first the Slack Bot token, then the Slack signing secret", required=False)
@@ -17,6 +18,7 @@ parser.add_argument("--debug", "-d", action="store_true", help="Enable debug log
 parser.add_argument("--headless", action="store_true", help="Run chatgpt wrapper in headless mode", required=False)
 parser.add_argument("--browser", choices=["firefox", "chromium"], default="firefox", help="Specify the browser used by chatgpt wrapper (playwright install <browser>)", required=False)
 parser.add_argument("--prefix", default="!", help="Specify the prefix to trigger the bot", required=False)
+parser.add_argument("--model", "-m", help="The model for the slack bot to ask", choices=["text-davinci-003", "text-davinci-002", "text-davinci-001", "chatgpt"], default="chatgpt", required=False)
 
 args = parser.parse_args()
 
@@ -64,7 +66,8 @@ def message(payload: dict):
 
 if __name__ == "__main__":
     lg.info("Starting GPT Thread from main.py")
-    gpt_thread = DavinciApi(handler, args.browser, args.prefix, args.headless)
+    gpt_thread = ChatGPTAPI(handler, args.browser, args.prefix, args.headless) if args.model == "chatgpt" \
+        else DavinciApi(handler, args.browser, args.prefix, args.headless, args.model)
     lg.info("Started GPT Thread from main.py")
     gpt_thread.start()
     app.run(debug=args.debug)
