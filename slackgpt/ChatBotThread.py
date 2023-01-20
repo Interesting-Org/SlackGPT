@@ -1,6 +1,6 @@
 import threading
-from Handler import Handler
 from Logger import *
+from QuestionHandler import QuestionHandler
 from Question import Question
 import time
 from Bot import Bot
@@ -8,7 +8,7 @@ from Queue import Queue
 
 class ChatBotThread(threading.Thread):
 
-    def __init__(self, handler: Handler, browser: str, prefix: str = "!", headless: bool = True):
+    def __init__(self, handler: QuestionHandler, browser: str, prefix: str = "!", headless: bool = True):
         """Inherits from threading.Thread and is used to run ChatGPT in a separate thread
 
         Args:
@@ -17,8 +17,8 @@ class ChatBotThread(threading.Thread):
             headless (bool, optional): Whether to run ChatGPT in headless mode. Defaults to True.
         """
         super().__init__()
-        self.queue: Queue = handler.queue
-        self.handler: Handler = handler
+        self.handler: QuestionHandler = handler
+        self.queue: Queue = self.handler.queue
         self.lg = Logger("ChatBot", level=Level.INFO, formatter=Logger.minecraft_formatter, handlers=[FileHandler.latest_file_handler(Logger.minecraft_formatter), main_file_handler])
         self.browser = browser
         self.headless = headless

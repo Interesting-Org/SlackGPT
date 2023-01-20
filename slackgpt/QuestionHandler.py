@@ -6,7 +6,7 @@ from Question import Question
 from Logger import *
 from slack_sdk import WebClient
 
-class Handler:
+class QuestionHandler:
     def __init__(self, client: WebClient) -> None:
         """Represents a handler for the questions, users and queue
         """
@@ -14,7 +14,7 @@ class Handler:
         self.users: List[User] = []
         self.queue: Queue = Queue()
         self.client = client
-        self.lg = Logger("Handler", level=Level.INFO, formatter=Logger.minecraft_formatter, handlers=[FileHandler.latest_file_handler(Logger.minecraft_formatter), main_file_handler])
+        self.lg = Logger("QuestionHandler", level=Level.INFO, formatter=Logger.minecraft_formatter, handlers=[FileHandler.latest_file_handler(Logger.minecraft_formatter), main_file_handler])
         self.waiting_messages = []
 
     def append_message(self, message_id: str) -> None:
@@ -76,7 +76,7 @@ class Handler:
         if index:
             self.queue.insert(index, question)
         else:
-            self.queue.push(question, index)
+            self.queue.push(question)
 
     def get_question(self) -> Question:
         """Returns the question of the user
