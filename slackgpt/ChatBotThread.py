@@ -38,7 +38,7 @@ class ChatBotThread(threading.Thread):
         while True:
             if len(self.queue) > 0:
                 try:
-                    question: Question = self.queue.pop()
+                    question: Question = self.handler.get_question()
                     self.lg.info(f"Processing question by {question.user}: {question.text[:30]}...")
                     self.ask(question)
                 except Exception as e:

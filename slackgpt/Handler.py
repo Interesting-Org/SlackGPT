@@ -78,3 +78,15 @@ class Handler:
         else:
             self.queue.push(question, index)
 
+    def get_question(self) -> Question:
+        """Returns the question of the user
+
+        Args:
+            username (str): The username of the user
+
+        Returns:
+            Question: The question of the user
+        """
+        return self.queue.pop()
+
+
