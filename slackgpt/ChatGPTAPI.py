@@ -29,4 +29,11 @@ class ChatGPTAPI(ChatBotThread):
         question.answer(self.bot.ask(question.text[(len(self.prefix) if not question.direct_message else 0):]))
         self.lg.info(f"Answered {question.username} in {time.time() - start} seconds")
         question.user.conversation_id = self.bot.conversation_id
+
+    def fail_behaviour(self, question: Question, exception: Exception) -> None:
+        if "Execution context was destroyed" in str(exception):
+            self.handler.add_new_question(question, 0)
+            question.user.conversation_id = None
+            self.lg.warning(f"Execution context was destroyed. Reinserting question into queue")
+        question.answer(f"An error occured while asking the ChatBot the question. Please try again later. \n{exception.with_traceback}")
         

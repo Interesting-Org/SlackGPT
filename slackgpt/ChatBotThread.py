@@ -43,11 +43,7 @@ class ChatBotThread(threading.Thread):
                     self.ask(question)
                 except Exception as e:
                     self.lg.error(e)
-                    if "Execution context was destroyed" in str(e):
-                        self.handler.add_new_question(question, 0)
-                        self.lg.warning(f"Execution context was destroyed. Reinserting question into queue")
-                        continue 
-                    question.answer(f"An error occured while asking the ChatBot the question. Please try again later. \n{e.with_traceback}")
+                    self.fail_behaviour(question, e)
 
     def ask(self, question: Question) -> str:
         """Write logic for API in here
@@ -59,3 +55,11 @@ class ChatBotThread(threading.Thread):
             str: The string answer provided by the api
         """
         return ""
+
+    def fail_behaviour(self, question: Question, exception: Exception) -> None:
+        """Called when the bot fails to answer a question
+
+        Args:
+            question (Question): The question that failed to be answered
+        """
+        question.answer("The ChatBot failed to answer your question. Please try again later.")
