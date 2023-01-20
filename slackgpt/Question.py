@@ -36,6 +36,15 @@ class Question:
         self.answer_text = answer_text
         self.send_answer()
 
+    def answer_without_sending(self, answer_text: str):
+        """Marks a question as answered without sending the answer to the user
+
+        Args:
+            question (Question): The question to mark as answered
+        """
+        self.is_answered = True
+        self.answer_text = answer_text
+
     def send_answer(self) -> None:
         """Called by the handler to send the answer to the user
 
