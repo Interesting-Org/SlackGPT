@@ -4,6 +4,7 @@ from Logger import *
 from Question import Question
 import time
 from Bot import Bot
+from Queue import Queue
 
 class ChatBotThread(threading.Thread):
 
@@ -16,7 +17,7 @@ class ChatBotThread(threading.Thread):
             headless (bool, optional): Whether to run ChatGPT in headless mode. Defaults to True.
         """
         super().__init__()
-        self.queue = handler.queue
+        self.queue: Queue = handler.queue
         self.handler = handler
         self.lg = Logger("ChatBot", level=Level.INFO, formatter=Logger.minecraft_formatter, handlers=[FileHandler.latest_file_handler(Logger.minecraft_formatter), main_file_handler])
         self.browser = browser
@@ -38,10 +39,14 @@ class ChatBotThread(threading.Thread):
             if len(self.queue) > 0:
                 try:
                     question: Question = self.queue.pop()
-                    self.lg.info(f"Processing question by {question.user}: {question.text[:30]}")
+                    self.lg.info(f"Processing question by {question.user}: {question.text[:30]}...")
                     self.ask(question)
                 except Exception as e:
                     self.lg.error(e)
+                    if "Execution context was destroyed" in str(e):
+                        self.queue.insert(0, question)
+                        self.lg.warning(f"Execution context was destroyed. Reinserting question into queue")
+                        continue 
                     question.answer(f"An error occured while asking the ChatBot the question. Please try again later. \n{e.with_traceback}")
 
     def ask(self, question: Question) -> str:
