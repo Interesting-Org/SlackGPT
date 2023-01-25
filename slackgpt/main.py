@@ -2,8 +2,19 @@ import argparse
 from SlackGPT import SlackGPT
 from slackeventsapi import SlackEventAdapter
 from flask import Flask, Response
-import json
+from Message import Message
 from Logger import *
+
+
+def get_user(payload):
+    event = payload["event"]
+    user = slackgpt.client.users_info(user=event["user"]) # lookup the user id to get the username and profile picture
+    username = user["user"]["profile"]["display_name"]
+    if username == "":
+        username = user["user"]["real_name"]
+
+    return username
+
 
 clg = Logger("CHAT", level=Level.WARNING, formatter=Logger.minecraft_formatter, handlers=[FileHandler(Level.LOG, Logger.minecraft_formatter, directory="./logs", generator=lambda directory, _: (directory + '/' if directory else '') + "chat.log"), main_file_handler])
 def message(payload: dict):
@@ -14,21 +25,24 @@ def message(payload: dict):
     if "bot_id" in event.keys():
         if not slackgpt.handler.is_unique_message(payload):
             return
-        if message == "I am thinking ...":
-            slackgpt.handler.waiting_messages.append(event["ts"])
+        #if message == "I am thinking ...":
+        #    slackgpt.handler.waiting_messages.append(event["ts"])
         return Response("OK", status=200)
 
-    slackgpt.handler.append_message(payload["event_id"])
+    msg = Message(payload)
+    slackgpt.handler.append_message(msg)
 
-    user = slackgpt.client.users_info(user=event["user"]) # lookup the user id to get the username and profile picture
-    username = user["user"]["profile"]["display_name"]
-    if username == "":
-        username = user["user"]["real_name"]
+    username = get_user(payload)
 
     clg.log(f"[{event['channel']}] {username}: {event['text']}")
 
     if message.lower().startswith(slackgpt.prefix.lower()) or event["channel_type"] == "im":
         return slackgpt.handler.process_message(payload, username)
+
+    elif msg.message.lower() == ".answer":
+        prev_payload = slackgpt.handler.messages[-2].payload
+        print(prev_payload)
+        return slackgpt.handler.process_message(prev_payload, get_user(prev_payload))
 
     return Response("OK", status=200)
 

@@ -5,12 +5,13 @@ from Queue import Queue
 from Question import Question
 from Logger import *
 from slack_sdk import WebClient
+from Message import Message
 
 class QuestionHandler:
     def __init__(self, client: WebClient) -> None:
         """Represents a handler for the questions, users and queue
         """
-        self.__messages: List[str] = []
+        self.messages: List[Message] = []
         self.users: List[User] = []
         self.queue: Queue = Queue()
         self.client = client
@@ -18,7 +19,7 @@ class QuestionHandler:
         self.waiting_messages = []
 
     def append_message(self, message_id: str) -> None:
-        self.__messages.append(message_id)
+        self.messages.append(message_id)
 
     def get_user(self, username: str) -> User:
         """Returns either an existing user or a new user object
@@ -64,7 +65,7 @@ class QuestionHandler:
         Returns:
             bool: Whether the message event has already been registered
         """
-        return not payload["event_id"] in self.__messages
+        return not payload["event_id"] in [message.event_id for message in self.messages]
 
     def add_new_question(self, question: Question, index: int = None) -> None:
         """Adds a new question to the queue
@@ -88,5 +89,3 @@ class QuestionHandler:
             Question: The question of the user
         """
         return self.queue.pop()
-
-
