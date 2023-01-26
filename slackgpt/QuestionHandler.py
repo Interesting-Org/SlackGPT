@@ -17,6 +17,7 @@ class QuestionHandler:
         self.client = client
         self.lg = Logger("QuestionHandler", level=Level.INFO, formatter=Logger.minecraft_formatter, handlers=[FileHandler.latest_file_handler(Logger.minecraft_formatter), main_file_handler])
         self.waiting_messages = []
+        self.answer_all_users = []
 
     def append_message(self, message_id: str) -> None:
         self.messages.append(message_id)
@@ -89,3 +90,6 @@ class QuestionHandler:
             Question: The question of the user
         """
         return self.queue.pop()
+
+    def should_answer_all(self, username: str) -> bool:
+        return username in self.answer_all_users

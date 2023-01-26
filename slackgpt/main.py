@@ -36,13 +36,22 @@ def message(payload: dict):
 
     clg.log(f"[{event['channel']}] {username}: {event['text']}")
 
-    if message.lower().startswith(slackgpt.prefix.lower()) or event["channel_type"] == "im":
-        return slackgpt.handler.process_message(payload, username)
-
-    elif msg.message.lower() == ".answer":
+    if msg.message.lower() == ".answer":
         prev_payload = slackgpt.handler.messages[-2].payload
         print(prev_payload)
         return slackgpt.handler.process_message(prev_payload, get_user(prev_payload))
+
+    elif msg.message.lower() == ".answer_all":
+        if slackgpt.handler.should_answer_all(username):
+            slackgpt.handler.answer_all_users.remove(username)
+        else:
+            slackgpt.handler.answer_all_users.append(username)
+
+        return Response("OK", status=200)
+    elif message.lower().startswith(slackgpt.prefix.lower()) or event["channel_type"] == "im" or slackgpt.handler.should_answer_all(username):
+        return slackgpt.handler.process_message(payload, username)
+
+
 
     return Response("OK", status=200)
 
