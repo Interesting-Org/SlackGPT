@@ -12,13 +12,36 @@ pip install -r requirements.txt
 
 `SLACK_APP_TOKEN and SLACK_BOT_TOKEN.`
 
-3. Use ngrok to obtain an IP for the Slack Event System to use and register it with Slack
-
 3. Follow the documentation at [ChatGPT-Wrapper](https://github.com/mmabrouk/chatgpt-wrapper) and login to your OpenAI account.
+    1. Install the latest version of this software directly from github: 
+    ```
+    pip install git+https://github.com/mmabrouk/chatgpt-wrapper
+    ```
+    2. Install a browser in playwright (if you haven't already). The program will use firefox by default.
+    ```
+    playwright install firefox
+    ```
+    3. Start up the program in install mode. This opens up a browser window. Log in to ChatGPT in the browser window, then stop the program.
+    ```
+    chatgpt install
+    ```
+    4. Last step is not needed, as it will be done when the bot is run
 
-4. Run the bot
+4. Use ngrok to obtain an IP for the Slack Event System to use and register it with Slack
+    1. Install ngrok
+    ```
+    curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null && echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list && sudo apt update && sudo apt install ngrok
+    ```
+    
+    2. Run 
+    ```
+    ngrok http 5000
+    ```
 
-`python app.py --token <SLACK_APP_TOKEN> --secret <SLACK_BOT_TOKEN>`
+5. Run the bot
+
+`python main.py --token <SLACK_APP_TOKEN> --secret <SLACK_BOT_TOKEN> --headless`
+
 
 ## Command Line Arguments
 ```
