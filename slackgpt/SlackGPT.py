@@ -21,6 +21,7 @@ class SlackGPT:
         self.handler = QuestionHandler(self.client)
         self.lg: Logger = Logger("SlackGPT", level=Level.DEBUG if debug else Level.INFO, formatter=Logger.minecraft_formatter, handlers=[FileHandler.latest_file_handler(Logger.minecraft_formatter), FileHandler.error_file_handler(Logger.minecraft_formatter), main_file_handler])
         self.app = app
+        self.happy_mode = False
 
     def start(self):
         self.lg.info("Starting SlackGPT")

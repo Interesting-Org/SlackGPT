@@ -4,6 +4,9 @@ from slackeventsapi import SlackEventAdapter
 from flask import Flask, Response, request
 from Message import Message
 from Logger import *
+from Question import Question
+import time
+from threading import Thread
 
 
 def get_user(payload):
@@ -78,6 +81,18 @@ if __name__ == "__main__":
         channel_id = request.values.get("channel_id")
         slackgpt.handler.toggle_answer_all(channel_id)
         return Response()
+
+    @app.route("/slack/happy_mode", methods=["POST"])
+    def happy_mode():
+        channel_id = request.values.get("channel_id")
+        slackgpt.happy_mode = not slackgpt.happy_mode
+        def happy_mode():
+            while True and slackgpt.happy_mode:
+                slackgpt.handler.add_new_question(Question(channel_id, "None", "Tell me a random funny joke!", slackgpt.handler.get_user(request.values.get("user_name")), 0, slackgpt.client))
+                time.sleep(60)
+
+        thread = Thread(target=happy_mode)
+        thread.start()
 
     slackgpt.start()
     
