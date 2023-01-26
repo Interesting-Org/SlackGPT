@@ -10,15 +10,15 @@ def get_user(payload):
     event = payload["event"]
     user = slackgpt.client.users_info(user=event["user"]) # lookup the user id to get the username and profile picture
     username = user["user"]["profile"]["display_name"]
+    user_id = event["user"]
     if username == "":
         username = user["user"]["real_name"]
-
-    return username
+    return user_id
 
 
 clg = Logger("CHAT", level=Level.WARNING, formatter=Logger.minecraft_formatter, handlers=[FileHandler(Level.LOG, Logger.minecraft_formatter, directory="./logs", generator=lambda directory, _: (directory + '/' if directory else '') + "chat.log"), main_file_handler])
-def message(payload: dict):
 
+def message(payload: dict):
     event = payload["event"]
     message = event["text"]
 
@@ -41,19 +41,14 @@ def message(payload: dict):
         print(prev_payload)
         return slackgpt.handler.process_message(prev_payload, get_user(prev_payload))
 
-    if msg.message.lower() == ".answer_all":
-        if slackgpt.handler.should_answer_all(username):
-            slackgpt.handler.answer_all_users.remove(username)
-        else:
-            slackgpt.handler.answer_all_users.append(username)
-
-        return Response("OK", status=200)
-    if message.lower().startswith(slackgpt.prefix.lower()) or event["channel_type"] == "im" or slackgpt.handler.should_answer_all(username):
+    is_dm = event["channel_type"] == "im"
+    channel_id = event["channel"]
+    auto_handle_on = slackgpt.handler.should_answer_all(channel_id)
+    if is_dm or auto_handle_on:
         return slackgpt.handler.process_message(payload, username)
 
-
-
     return Response("OK", status=200)
+
 
 if __name__ == "__main__":
     
@@ -74,16 +69,15 @@ if __name__ == "__main__":
     else:
         token, secret = args.token, args.secret
 
-    
     app = Flask("SlackGPT")
-
-    @app.route("/slack/answer", methods=["POST"])
-    def answer():
-        clg.log(request.values.get("user_id"))
-        return Response("OK", status=200)
-
     adapter = SlackEventAdapter(secret, "/slack/events", app)
     adapter.on("message")(message)
     slackgpt = SlackGPT(token=token, secret=secret, app=app, prefix=args.prefix, model=args.model, debug=args.debug, headless=args.headless, browser=args.browser)
+    @app.route("/slack/answer_all", methods=["POST"])
+    def answer_all():
+        channel_id = request.values.get("channel_id")
+        slackgpt.handler.toggle_answer_all(channel_id)
+        return Response()
+
     slackgpt.start()
     

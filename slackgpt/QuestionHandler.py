@@ -94,8 +94,10 @@ class QuestionHandler:
     def should_answer_all(self, username: str) -> bool:
         return username in self.answer_all_users
 
-    def toggle_answer_all(self, username: str) -> None:
-        if username in self.answer_all_users:
+    def toggle_answer_all(self, username: str) -> bool:
+        should_answer_all = self.should_answer_all(username)
+        if should_answer_all:
             self.answer_all_users.remove(username)
         else:
             self.answer_all_users.append(username)
+        return not should_answer_all
