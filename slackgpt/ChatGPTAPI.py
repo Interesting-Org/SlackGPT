@@ -22,11 +22,11 @@ class ChatGPTAPI(ChatBotThread):
         self.create_bot = lambda: ChatGPT(browser=self.browser, headless=self.headless)
 
     def ask(self, question: Question):
-        self.lg.log(f"Asking ChatGPT with prompt {question.text[(len(self.prefix) if not question.direct_message else 0):]}")
+        self.lg.log(f"Asking ChatGPT with prompt {question.text}")
         if not question.user.conversation_id is None:
             self.bot.conversation_id = question.user.conversation_id
         start = time.time()
-        question.answer(self.bot.ask(question.text[(len(self.prefix) if not question.direct_message else 0):]))
+        question.answer(self.bot.ask(question.text))
         self.lg.info(f"Answered {question.username} in {time.time() - start} seconds")
         question.user.conversation_id = self.bot.conversation_id
 
