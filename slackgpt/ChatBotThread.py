@@ -1,13 +1,14 @@
 import threading
-from Handler import Handler
 from Logger import *
+from QuestionHandler import QuestionHandler
 from Question import Question
 import time
 from Bot import Bot
+from Queue import Queue
 
 class ChatBotThread(threading.Thread):
 
-    def __init__(self, handler: Handler, browser: str, prefix: str = "!", headless: bool = True):
+    def __init__(self, handler: QuestionHandler, browser: str, prefix: str = "!", headless: bool = True):
         """Inherits from threading.Thread and is used to run ChatGPT in a separate thread
 
         Args:
@@ -16,8 +17,8 @@ class ChatBotThread(threading.Thread):
             headless (bool, optional): Whether to run ChatGPT in headless mode. Defaults to True.
         """
         super().__init__()
-        self.queue = handler.queue
-        self.handler = handler
+        self.handler: QuestionHandler = handler
+        self.queue: Queue = self.handler.queue
         self.lg = Logger("ChatBot", level=Level.INFO, formatter=Logger.minecraft_formatter, handlers=[FileHandler.latest_file_handler(Logger.minecraft_formatter), main_file_handler])
         self.browser = browser
         self.headless = headless
@@ -37,11 +38,12 @@ class ChatBotThread(threading.Thread):
         while True:
             if len(self.queue) > 0:
                 try:
-                    question = self.queue.pop()
+                    question: Question = self.handler.get_question()
+                    self.lg.info(f"Processing question by {question.user}: {question.text[:30]}...")
                     self.ask(question)
                 except Exception as e:
                     self.lg.error(e)
-                    question.answer(f"An error occured while asking the ChatBot the question. Please try again later. \n{e.with_traceback}")
+                    self.fail_behaviour(question, e)
 
     def ask(self, question: Question) -> str:
         """Write logic for API in here
@@ -53,3 +55,11 @@ class ChatBotThread(threading.Thread):
             str: The string answer provided by the api
         """
         return ""
+
+    def fail_behaviour(self, question: Question, exception: Exception) -> None:
+        """Called when the bot fails to answer a question
+
+        Args:
+            question (Question): The question that failed to be answered
+        """
+        question.answer("The ChatBot failed to answer your question. Please try again later.")

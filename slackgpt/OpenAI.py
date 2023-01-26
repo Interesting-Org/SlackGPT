@@ -6,7 +6,7 @@ from Question import Question
 import time
 from Logger import *
 
-class DavinciBot(Bot):
+class OpenAIBot(Bot):
 
     def __init__(self, api_key: str, model: str = "text-davinci-003", max_tokens: int = 2048, temperature: float = 0.5, amount: int = 1, ):
         """Extends bot and adds the Davinci model
@@ -55,12 +55,12 @@ class DavinciBot(Bot):
             self.lg.error(f"data = {data}")
 
 
-class DavinciApi(ChatBotThread):
+class OpenAIBotThread(ChatBotThread):
 
     def __init__(self, handler, browser, prefix, headless=True):
         super().__init__(handler, browser, prefix, headless)
         self.lg.name = "DavinciApi"
-        self.create_bot = lambda: DavinciBot(open("OPENAI_KEY", "r").read())
+        self.create_bot = lambda: OpenAIBot(open("OPENAI_KEY", "r").read())
 
     def ask(self, question: Question):
         self.lg.info(f"Asking Davinci with prompt {question.text[(len(self.prefix) if not question.direct_message else 0):]}")

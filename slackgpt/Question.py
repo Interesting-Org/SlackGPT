@@ -18,10 +18,10 @@ class Question:
         self.answer_text = None # The field for the future answer by ChatGPT
         self.is_answered = False # Whether or not the question has been answered
         self.user = user # Get the user object from the handler
-        self.user.add(self) # Add the question to the user's pending list   
 
     def __str__(self):
-        return f"Question({self.channel}, {self.user.username}, {self.text}) -> {self.answer_text}"
+        return f"Question({self.channel}, {self.username}, {self.text}, {self.ts}, {self.direct_message}, {self.is_answered}, {self.answer_text})"
+
 
     def __getitem__(self, index):
         return self
@@ -34,9 +34,16 @@ class Question:
         """
         self.is_answered = True
         self.answer_text = answer_text
-        self.user.answered.append(self)
-        self.user.pending.remove(self)
         self.send_answer()
+
+    def answer_without_sending(self, answer_text: str):
+        """Marks a question as answered without sending the answer to the user
+
+        Args:
+            question (Question): The question to mark as answered
+        """
+        self.is_answered = True
+        self.answer_text = answer_text
 
     def send_answer(self) -> None:
         """Called by the handler to send the answer to the user
