@@ -1,7 +1,7 @@
 import argparse
 from SlackGPT import SlackGPT
 from slackeventsapi import SlackEventAdapter
-from flask import Flask, Response
+from flask import Flask, Response, request
 from Message import Message
 from Logger import *
 
@@ -76,6 +76,12 @@ if __name__ == "__main__":
 
     
     app = Flask("SlackGPT")
+
+    @app.route("/slack/answer", methods=["POST"])
+    def answer():
+        clg.log(request.values.get("user_id"))
+        return Response("OK", status=200)
+
     adapter = SlackEventAdapter(secret, "/slack/events", app)
     adapter.on("message")(message)
     slackgpt = SlackGPT(token=token, secret=secret, app=app, prefix=args.prefix, model=args.model, debug=args.debug, headless=args.headless, browser=args.browser)
